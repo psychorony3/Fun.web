@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rony.Fun - Next-Gen Crypto & Prediction Dashboard</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts (Inter & JetBrains Mono) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              accent: '#39FF14'
+            },
+            dark: {
+              bg: '#070a0f',
+              surface: '#0d131d',
+              card: '#131b28',
+              border: '#1e293b',
+              hover: '#1a2436'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070a0f;
+      color: #f3f4f6;
+      font-family: 'Inter', sans-serif;
+    }
+    .neon-border {
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .neon-glow {
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.35);
+    }
+    .glass-card {
+      background: rgba(19, 27, 40, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: #070a0f;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    @keyframes ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+    .ticker-wrap {
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-move {
+      display: inline-block;
+      animation: ticker 25s linear infinite;
+    }
+    .ticker-move:hover {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-dark-bg text-gray-100 overflow-x-hidden scrollbar-thin">
+
+  <!-- TOP TICKER BAR -->
+  <div class="bg-dark-surface border-b border-dark-border py-1.5 ticker-wrap text-xs font-mono select-none">
+    <div class="ticker-move flex items-center gap-8">
+      <span class="flex items-center gap-2"><strong class="text-gray-300">BTC/USD:</strong> $68,420.50 <span class="text-brand-400">+2.4% ▲</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">ETH/USD:</strong> $3,540.12 <span class="text-brand-400">+1.8% ▲</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">SOL/USD:</strong> $142.80 <span class="text-red-400">-0.6% ▼</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">POLY/MARKET TREND:</strong> <span class="text-purple-400">US Election 2024 (Vol: $840M)</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">RONY/FUN:</strong> $1.00 <span class="text-brand-400">+100% 🔥</span></span>
+      <!-- Duplicate for infinite scroll -->
+      <span class="flex items-center gap-2"><strong class="text-gray-300">BTC/USD:</strong> $68,420.50 <span class="text-brand-400">+2.4% ▲</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">ETH/USD:</strong> $3,540.12 <span class="text-brand-400">+1.8% ▲</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">SOL/USD:</strong> $142.80 <span class="text-red-400">-0.6% ▼</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">POLY/MARKET TREND:</strong> <span class="text-purple-400">US Election 2024 (Vol: $840M)</span></span>
+      <span class="flex items-center gap-2"><strong class="text-gray-300">RONY/FUN:</strong> $1.00 <span class="text-brand-400">+100% 🔥</span></span>
+    </div>
+  </div>
+
+  <!-- HEADER / NAVBAR -->
+  <header class="sticky top-0 z-40 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- LOGO -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-700 flex items-center justify-center font-black text-xl text-black shadow-lg shadow-brand-500/20">
+          R
+        </div>
+        <div>
+          <a href="#" class="text-xl font-bold tracking-tight text-white flex items-center gap-1">
+            Rony<span class="text-brand-500">.Fun</span>
+            <span class="bg-brand-500/10 text-brand-400 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border border-brand-500/20">PRO v2.4</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- SEARCH BAR -->
+      <div class="hidden md:flex items-center flex-1 max-w-md mx-6">
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+          <input type="text" placeholder="Search tokens, markets, or Polymarket events..." class="w-full bg-dark-card border border-dark-border rounded-xl pl-9 pr-4 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500/50 transition-all">
+        </div>
+      </div>
+
+      <!-- HEADER ACTIONS -->
+      <div class="flex items-center gap-3">
+        <!-- Polymarket Fast Link -->
+        <a href="https://polymarket.com/?via=rony-j6jh" target="_blank" class="hidden sm:flex items-center gap-2 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:text-purple-200 px-3 py-1.5 rounded-xl text-xs font-medium transition">
+          <i data-lucide="trending-up" class="w-4 h-4 text-purple-400"></i>
+          Polymarket
+          <i data-lucide="external-link" class="w-3 h-3 text-purple-400"></i>
+        </a>
+
+        <!-- Social Buttons -->
+        <a href="https://x.com/Rony_201000" target="_blank" class="p-2 rounded-xl bg-dark-card border border-dark-border hover:border-gray-600 text-gray-300 hover:text-white transition" title="Twitter / X">
+          <i data-lucide="twitter" class="w-4 h-4"></i>
+        </a>
+        <a href="https://t.me/Rony_201000" target="_blank" class="p-2 rounded-xl bg-dark-card border border-dark-border hover:border-blue-500/50 text-gray-300 hover:text-blue-400 transition" title="Telegram">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </a>
+
+        <!-- Connect Wallet Button -->
+        <button id="connectWalletBtn" onclick="toggleWalletModal()" class="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-black font-semibold px-4 py-2 rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span id="walletBtnText">Connect Wallet</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="max-w-7xl mx-auto w-full flex-1 flex flex-col md:flex-row gap-6 p-4 lg:p-8">
+
+    <!-- LEFT SIDEBAR NAV -->
+    <aside class="w-full md:w-64 flex-shrink-0 space-y-6">
+      
+      <!-- Primary Nav Group -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-3 space-y-1">
+        <p class="text-[10px] font-mono font-semibold text-gray-500 uppercase px-3 py-2 tracking-wider">Menu</p>
+        <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          Dashboard
+        </a>
+        <a href="#" onclick="switchTab('swap')" id="nav-swap" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-dark-hover hover:text-gray-200 transition">
+          <i data-lucide="repeat" class="w-4 h-4"></i>
+          Instant Swap
+        </a>
+        <a href="#" onclick="switchTab('polymarket')" id="nav-polymarket" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-dark-hover hover:text-gray-200 transition">
+          <span class="flex items-center gap-3">
+            <i data-lucide="pie-chart" class="w-4 h-4"></i>
+            Predictions
+          </span>
+          <span class="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">HOT</span>
+        </a>
+        <a href="#" onclick="switchTab('affiliate')" id="nav-affiliate" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-dark-hover hover:text-gray-200 transition">
+          <i data-lucide="share-2" class="w-4 h-4"></i>
+          Affiliate Hub
+        </a>
+      </div>
+
+      <!-- POLYMARKET PROMO WIDGET -->
+      <div class="neon-border rounded-2xl p-4 bg-gradient-to-b from-purple-900/20 to-dark-card relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-purple-400 mb-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Polymarket Official Partner
+        </div>
+        <h4 class="text-sm font-bold text-white mb-1">Trade Real-World Events</h4>
+        <p class="text-xs text-gray-400 mb-4">Join world's largest prediction market with 0% gas fees via Rony.Fun referral.</p>
+        <a href="https://polymarket.com/?via=rony-j6jh" target="_blank" class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-medium py-2 px-4 rounded-xl text-xs transition">
+          Join Polymarket Now
+          <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </a>
+      </div>
+
+      <!-- SOCIAL COMMUNITY BOX -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+        <p class="text-xs font-semibold text-gray-300 flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
+          Join Rony.Fun Community
+        </p>
+        <div class="grid grid-cols-2 gap-2">
+          <a href="https://x.com/Rony_201000" target="_blank" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-dark-surface border border-dark-border hover:border-gray-500 transition text-center group">
+            <i data-lucide="twitter" class="w-5 h-5 text-gray-400 group-hover:text-white mb-1"></i>
+            <span class="text-[11px] font-medium text-gray-300">Twitter</span>
+            <span class="text-[9px] text-gray-500">@Rony_201000</span>
+          </a>
+          <a href="https://t.me/Rony_201000" target="_blank" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-dark-surface border border-dark-border hover:border-blue-500/40 transition text-center group">
+            <i data-lucide="send" class="w-5 h-5 text-gray-400 group-hover:text-blue-400 mb-1"></i>
+            <span class="text-[11px] font-medium text-gray-300">Telegram</span>
+            <span class="text-[9px] text-gray-500">@Rony_201000</span>
+          </a>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER DASHBOARD CONTENT -->
+    <main class="flex-1 space-y-6 overflow-hidden">
+
+      <!-- TAB 1: DASHBOARD -->
+      <div id="tab-dashboard" class="tab-content space-y-6">
+        
+        <!-- TOP GRID: PORTFOLIO & SWAP WIDGET -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- MAIN CHART CARD (2 Cols) -->
+          <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-dark-border flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="text-xs font-mono text-gray-400">Total Portfolio Value</span>
+                  <div class="flex items-baseline gap-3 mt-1">
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight font-mono" id="portfolioBalance">$98,230.02</h2>
+                    <span class="text-xs font-semibold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-500/20 flex items-center gap-1">
+                      <i data-lucide="trending-up" class="w-3 h-3"></i> +4.21% (24h)
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Timeframe Selectors -->
+                <div class="flex items-center bg-dark-bg p-1 rounded-xl border border-dark-border gap-1 text-xs font-mono">
+                  <button onclick="updateChart('1D')" class="tf-btn px-2.5 py-1 rounded-lg text-gray-400 hover:text-white transition">1D</button>
+                  <button onclick="updateChart('1W')" class="tf-btn px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-400 font-semibold border border-brand-500/30">1W</button>
+                  <button onclick="updateChart('1M')" class="tf-btn px-2.5 py-1 rounded-lg text-gray-400 hover:text-white transition">1M</button>
+                  <button onclick="updateChart('1Y')" class="tf-btn px-2.5 py-1 rounded-lg text-gray-400 hover:text-white transition">1Y</button>
+                  <button onclick="updateChart('ALL')" class="tf-btn px-2.5 py-1 rounded-lg text-gray-400 hover:text-white transition">ALL</button>
+                </div>
+              </div>
+
+              <!-- CHART CANVAS CONTAINER -->
+              <div class="w-full h-56 relative">
+                <canvas id="portfolioChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Quick Stats Strip -->
+            <div class="grid grid-cols-3 gap-4 pt-4 mt-4 border-t border-dark-border/60 text-xs">
+              <div>
+                <span class="text-gray-500">24h Earnings</span>
+                <p class="font-mono font-semibold text-brand-400">+$3,842.10</p>
+              </div>
+              <div>
+                <span class="text-gray-500">Active Assets</span>
+                <p class="font-mono font-semibold text-gray-200">6 Cryptos</p>
+              </div>
+              <div>
+                <span class="text-gray-500">Network Fee Savings</span>
+                <p class="font-mono font-semibold text-purple-400">$120.40</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SWAP CARD (1 Col) -->
+          <div class="glass-card rounded-2xl p-6 border border-dark-border flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                  <i data-lucide="arrow-right-left" class="w-4 h-4 text-brand-400"></i>
+                  Quick Swap
+                </h3>
+                <button onclick="refreshSwapRate()" class="p-1 rounded-lg bg-dark-bg text-gray-400 hover:text-white text-xs border border-dark-border">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+              <!-- Swap Input -->
+              <div class="space-y-3">
+                <div class="bg-dark-bg p-3 rounded-xl border border-dark-border">
+                  <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>Pay</span>
+                    <span>Bal: <strong class="text-gray-200 font-mono">1.45 BTC</strong></span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <input type="number" id="swapFromAmount" value="0.1" oninput="calculateSwap()" class="bg-transparent text-lg font-mono font-bold text-white focus:outline-none w-2/3" placeholder="0.0">
+                    <select id="swapFromToken" onchange="calculateSwap()" class="bg-dark-card border border-dark-border rounded-lg text-xs font-semibold px-2 py-1 text-white focus:outline-none">
+                      <option value="BTC">BTC</option>
+                      <option value="ETH">ETH</option>
+                      <option value="SOL">SOL</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Arrow Switcher -->
+                <div class="flex justify-center -my-2 relative z-10">
+                  <button onclick="reverseSwapTokens()" class="bg-dark-card border border-dark-border p-2 rounded-xl text-brand-400 hover:scale-110 transition shadow-md">
+                    <i data-lucide="arrow-down-up" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Swap Output -->
+                <div class="bg-dark-bg p-3 rounded-xl border border-dark-border">
+                  <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>Receive (Est.)</span>
+                    <span>Bal: <strong class="text-gray-200 font-mono">24,230 USDT</strong></span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <input type="number" id="swapToAmount" value="6842.05" readonly class="bg-transparent text-lg font-mono font-bold text-brand-400 focus:outline-none w-2/3" placeholder="0.0">
+                    <select id="swapToToken" onchange="calculateSwap()" class="bg-dark-card border border-dark-border rounded-lg text-xs font-semibold px-2 py-1 text-white focus:outline-none">
+                      <option value="USDT">USDT</option>
+                      <option value="ETH">ETH</option>
+                      <option value="RONY">RONY</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rate Info -->
+              <div class="mt-4 space-y-1.5 text-xs text-gray-400 font-mono">
+                <div class="flex justify-between">
+                  <span>Exchange Rate</span>
+                  <span class="text-gray-200" id="swapRateText">1 BTC ≈ 68,420.50 USDT</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Slippage Tolerance</span>
+                  <span class="text-brand-400">0.5%</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Estimated Gas Fee</span>
+                  <span class="text-gray-200">$0.85</span>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="executeSwap()" class="w-full mt-4 bg-brand-500 hover:bg-brand-600 text-black font-bold py-3 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm flex items-center justify-center gap-2">
+              Confirm Swap
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- TOP ASSETS TABLE -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
+          <div class="p-4 border-b border-dark-border flex items-center justify-between">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i data-lucide="coins" class="w-4 h-4 text-brand-400"></i>
+              Top Portfolio Assets
+            </h3>
+            <span class="text-xs font-mono text-gray-400">Live Prices via Rony.Fun Feed</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-dark-surface/50 text-gray-400 font-mono text-[11px] uppercase">
+                <tr>
+                  <th class="p-4">Asset</th>
+                  <th class="p-4">Holdings</th>
+                  <th class="p-4">Price</th>
+                  <th class="p-4">24h Change</th>
+                  <th class="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-border/40 font-mono">
+                
+                <!-- Bitcoin -->
+                <tr class="hover:bg-dark-hover/50 transition">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">₿</div>
+                    <div>
+                      <div class="font-bold text-white font-sans text-sm">Bitcoin</div>
+                      <div class="text-gray-500 text-[10px]">BTC</div>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <div class="text-gray-200 font-semibold">0.31234145 BTC</div>
+                    <div class="text-gray-500 text-[10px]">$21,370.80</div>
+                  </td>
+                  <td class="p-4 text-gray-200 font-semibold">$68,420.50</td>
+                  <td class="p-4 text-brand-400 font-semibold">+2.41% ▲</td>
+                  <td class="p-4 text-right">
+                    <button onclick="switchTab('swap')" class="bg-dark-surface hover:bg-dark-border px-3 py-1.5 rounded-lg border border-dark-border text-gray-200 transition">Trade</button>
+                  </td>
+                </tr>
+
+                <!-- Ethereum -->
+                <tr class="hover:bg-dark-hover/50 transition">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">Ξ</div>
+                    <div>
+                      <div class="font-bold text-white font-sans text-sm">Ethereum</div>
+                      <div class="text-gray-500 text-[10px]">ETH</div>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <div class="text-gray-200 font-semibold">4.20133115 ETH</div>
+                    <div class="text-gray-500 text-[10px]">$14,873.12</div>
+                  </td>
+                  <td class="p-4 text-gray-200 font-semibold">$3,540.12</td>
+                  <td class="p-4 text-brand-400 font-semibold">+1.85% ▲</td>
+                  <td class="p-4 text-right">
+                    <button onclick="switchTab('swap')" class="bg-dark-surface hover:bg-dark-border px-3 py-1.5 rounded-lg border border-dark-border text-gray-200 transition">Trade</button>
+                  </td>
+                </tr>
+
+                <!-- Solana -->
+                <tr class="hover:bg-dark-hover/50 transition">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">S</div>
+                    <div>
+                      <div class="font-bold text-white font-sans text-sm">Solana</div>
+                      <div class="text-gray-500 text-[10px]">SOL</div>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <div class="text-gray-200 font-semibold">25.3562 SOL</div>
+                    <div class="text-gray-500 text-[10px]">$3,620.80</div>
+                  </td>
+                  <td class="p-4 text-gray-200 font-semibold">$142.80</td>
+                  <td class="p-4 text-red-400 font-semibold">-0.62% ▼</td>
+                  <td class="p-4 text-right">
+                    <button onclick="switchTab('swap')" class="bg-dark-surface hover:bg-dark-border px-3 py-1.5 rounded-lg border border-dark-border text-gray-200 transition">Trade</button>
+                  </td>
+                </tr>
+
+                <!-- RONY FUN TOKEN -->
+                <tr class="hover:bg-dark-hover/50 transition bg-brand-500/5">
+                  <td class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-brand-500 text-black flex items-center justify-center font-bold text-xs">R</div>
+                    <div>
+                      <div class="font-bold text-white font-sans text-sm flex items-center gap-1.5">
+                        Rony.Fun Token
+                        <span class="bg-brand-500/20 text-brand-400 text-[9px] px-1.5 rounded">NATIVE</span>
+                      </div>
+                      <div class="text-gray-500 text-[10px]">RONY</div>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <div class="text-gray-200 font-semibold">50,000 RONY</div>
+                    <div class="text-gray-500 text-[10px]">$50,000.00</div>
+                  </td>
+                  <td class="p-4 text-gray-200 font-semibold">$1.00</td>
+                  <td class="p-4 text-brand-400 font-semibold">+100.0% 🔥</td>
+                  <td class="p-4 text-right">
+                    <button onclick="switchTab('swap')" class="bg-brand-500 text-black font-semibold px-3 py-1.5 rounded-lg transition">Buy RONY</button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: INSTANT SWAP DEDICATED -->
+      <div id="tab-swap" class="tab-content hidden max-w-xl mx-auto space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-dark-border">
+          <h2 class="text-xl font-bold text-white mb-2">Decentralized Token Swap</h2>
+          <p class="text-xs text-gray-400 mb-6">Trade tokens instantly with automated routing and ultra-low gas fees on Rony.Fun DEX.</p>
+          
+          <div class="space-y-4">
+            <div class="bg-dark-bg p-4 rounded-xl border border-dark-border">
+              <label class="text-xs text-gray-400 block mb-2">You Pay</label>
+              <div class="flex items-center gap-3">
+                <input type="number" value="1.0" class="w-full bg-transparent text-2xl font-mono font-bold text-white focus:outline-none">
+                <select class="bg-dark-card text-white text-sm font-semibold p-2 rounded-xl border border-dark-border focus:outline-none">
+                  <option>ETH</option>
+                  <option>BTC</option>
+                  <option>SOL</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex justify-center">
+              <div class="p-2 bg-dark-card border border-dark-border rounded-xl text-brand-400">
+                <i data-lucide="arrow-down" class="w-5 h-5"></i>
+              </div>
+            </div>
+
+            <div class="bg-dark-bg p-4 rounded-xl border border-dark-border">
+              <label class="text-xs text-gray-400 block mb-2">You Receive</label>
+              <div class="flex items-center gap-3">
+                <input type="number" value="3540.12" readonly class="w-full bg-transparent text-2xl font-mono font-bold text-brand-400 focus:outline-none">
+                <select class="bg-dark-card text-white text-sm font-semibold p-2 rounded-xl border border-dark-border focus:outline-none">
+                  <option>USDT</option>
+                  <option>USDC</option>
+                  <option>RONY</option>
+                </select>
+              </div>
+            </div>
+
+            <button onclick="executeSwap()" class="w-full bg-brand-500 hover:bg-brand-600 text-black font-bold py-3.5 rounded-xl transition shadow-lg shadow-brand-500/20 text-sm">
+              Execute Web3 Trade
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: POLYMARKET PREDICTIONS -->
+      <div id="tab-polymarket" class="tab-content hidden space-y-6">
+        <div class="bg-gradient-to-r from-purple-900/40 via-dark-card to-dark-card border border-purple-500/30 rounded-2xl p-6">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <span class="text-xs font-mono text-purple-400 uppercase font-semibold">Featured Partner Market</span>
+              <h2 class="text-2xl font-extrabold text-white mt-1">Polymarket Live Event Trading</h2>
+              <p class="text-xs text-gray-300 mt-1">Trade on real-world outcomes: Politics, Crypto, Tech & Pop Culture with high liquidity.</p>
+            </div>
+            <a href="https://polymarket.com/?via=rony-j6jh" target="_blank" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
+              Open Polymarket
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- PREDICTION CARDS GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Card 1 -->
+          <div class="bg-dark-card border border-dark-border hover:border-purple-500/40 rounded-2xl p-5 space-y-4 transition">
+            <div class="flex justify-between items-start">
+              <span class="text-[10px] font-mono bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20">POLITICS</span>
+              <span class="text-xs font-mono text-gray-400">$840M Volume</span>
+            </div>
+            <h3 class="font-bold text-white text-base">US Presidential Election Winner 2024</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-300">Candidate A</span>
+                <span class="font-mono text-brand-400 font-bold">54% Odds</span>
+              </div>
+              <div class="w-full bg-dark-bg rounded-full h-2">
+                <div class="bg-brand-500 h-2 rounded-full" style="width: 54%"></div>
+              </div>
+            </div>
+            <a href="https://polymarket.com/?via=rony-j6jh" target="_blank" class="w-full block text-center bg-dark-surface hover:bg-dark-hover border border-dark-border text-xs font-semibold text-purple-300 py-2 rounded-xl transition">
+              Bet on Polymarket →
+            </a>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-dark-card border border-dark-border hover:border-purple-500/40 rounded-2xl p-5 space-y-4 transition">
+            <div class="flex justify-between items-start">
+              <span class="text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20">CRYPTO</span>
+              <span class="text-xs font-mono text-gray-400">$120M Volume</span>
+            </div>
+            <h3 class="font-bold text-white text-base">Will Bitcoin Reach $100k in 2024?</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-300">YES Outcome</span>
+                <span class="font-mono text-brand-400 font-bold">68% Odds</span>
+              </div>
+              <div class="w-full bg-dark-bg rounded-full h-2">
+                <div class="bg-brand-500 h-2 rounded-full" style="width: 68%"></div>
+              </div>
+            </div>
+            <a href="https://polymarket.com/?via=rony-j6jh" target="_blank" class="w-full block text-center bg-dark-surface hover:bg-dark-hover border border-dark-border text-xs font-semibold text-purple-300 py-2 rounded-xl transition">
+              Bet on Polymarket →
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 4: AFFILIATE HUB -->
+      <div id="tab-affiliate" class="tab-content hidden space-y-6">
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">Rony.Fun Affiliate Portal</h2>
+            <p class="text-xs text-gray-400 mt-1">Official Polymarket and Rony.Fun referral system. Earn commissions on trade volume.</p>
+          </div>
+
+          <!-- Affiliate Link Box -->
+          <div class="bg-dark-bg p-4 rounded-xl border border-dark-border space-y-2">
+            <label class="text-xs font-semibold text-gray-300">Your Polymarket Referral Link:</label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="affLink" value="https://polymarket.com/?via=rony-j6jh" readonly class="w-full bg-dark-card border border-dark-border text-xs font-mono text-brand-400 p-2.5 rounded-lg focus:outline-none">
+              <button onclick="copyAffLink()" class="bg-brand-500 hover:bg-brand-600 text-black font-semibold text-xs px-4 py-2.5 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                Copy Link
+              </button>
+            </div>
+          </div>
+
+          <!-- Referral Stats -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
+            <div class="bg-dark-surface p-4 rounded-xl border border-dark-border">
+              <span class="text-[10px] text-gray-500 uppercase">Total Referrals</span>
+              <p class="text-xl font-bold text-white mt-1">142 Users</p>
+            </div>
+            <div class="bg-dark-surface p-4 rounded-xl border border-dark-border">
+              <span class="text-[10px] text-gray-500 uppercase">Trade Volume</span>
+              <p class="text-xl font-bold text-brand-400 mt-1">$1.2M USD</p>
+            </div>
+            <div class="bg-dark-surface p-4 rounded-xl border border-dark-border">
+              <span class="text-[10px] text-gray-500 uppercase">Earned Commission</span>
+              <p class="text-xl font-bold text-purple-400 mt-1">$4,850.00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-dark-border bg-dark-surface py-6 px-4 lg:px-8 mt-12 text-xs text-gray-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-white">Rony.Fun</span> &copy; 2026. Powered by Web3 & Polymarket Engine.
+      </div>
+
+      <div class="flex items-center gap-6">
+        <a href="https://polymarket.com/?via=rony-j6jh" target="_blank" class="hover:text-purple-400 transition">Polymarket Partner</a>
+        <a href="https://x.com/Rony_201000" target="_blank" class="hover:text-white transition">Twitter (@Rony_201000)</a>
+        <a href="https://t.me/Rony_201000" target="_blank" class="hover:text-blue-400 transition">Telegram (@Rony_201000)</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WALLET CONNECTION MODAL -->
+  <div id="walletModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-dark-card border border-dark-border w-full max-w-sm rounded-2xl p-6 space-y-4 relative">
+      <button onclick="toggleWalletModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <h3 class="text-lg font-bold text-white">Connect Web3 Wallet</h3>
+      <p class="text-xs text-gray-400">Select your preferred wallet to access Rony.Fun features.</p>
+
+      <div class="space-y-2 pt-2">
+        <button onclick="connectWallet('MetaMask')" class="w-full flex items-center justify-between p-3 rounded-xl bg-dark-bg hover:bg-dark-hover border border-dark-border transition">
+          <span class="text-sm font-semibold text-white">MetaMask</span>
+          <span class="text-xs text-amber-400 font-mono">Popular</span>
+        </button>
+        <button onclick="connectWallet('Phantom')" class="w-full flex items-center justify-between p-3 rounded-xl bg-dark-bg hover:bg-dark-hover border border-dark-border transition">
+          <span class="text-sm font-semibold text-white">Phantom</span>
+          <span class="text-xs text-purple-400 font-mono">Solana</span>
+        </button>
+        <button onclick="connectWallet('WalletConnect')" class="w-full flex items-center justify-between p-3 rounded-xl bg-dark-bg hover:bg-dark-hover border border-dark-border transition">
+          <span class="text-sm font-semibold text-white">WalletConnect</span>
+          <span class="text-xs text-blue-400 font-mono">QR Code</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Chart.js Setup
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    
+    // Gradient fill for neon green chart
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(34, 197, 94, 0.35)');
+    gradient.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
+
+    const chartData = {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'Portfolio Value ($)',
+        data: [88400, 91200, 89500, 94300, 93100, 96800, 98230],
+        borderColor: '#22c55e',
+        borderWidth: 3,
+        fill: true,
+        backgroundColor: gradient,
+        tension: 0.4,
+        pointBackgroundColor: '#22c55e',
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    };
+
+    const portfolioChart = new Chart(ctx, {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: '#131b28',
+            borderColor: '#1e293b',
+            borderWidth: 1,
+            titleFont: { family: 'Inter', size: 12 },
+            bodyFont: { family: 'JetBrains Mono', size: 13, weight: 'bold' },
+            callbacks: {
+              label: function(context) {
+                return '$' + context.parsed.y.toLocaleString();
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#6b7280', font: { family: 'Inter', size: 10 } }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { 
+              color: '#6b7280', 
+              font: { family: 'JetBrains Mono', size: 10 },
+              callback: function(val) { return '$' + (val/1000) + 'k'; }
+            }
+          }
+        }
+      }
+    });
+
+    // Timeframe chart updater
+    function updateChart(tf) {
+      const randomMultiplier = () => Math.floor(Math.random() * 10000) + 85000;
+      let newData = [randomMultiplier(), randomMultiplier(), randomMultiplier(), randomMultiplier(), randomMultiplier(), randomMultiplier(), 98230];
+      
+      portfolioChart.data.datasets[0].data = newData;
+      portfolioChart.update();
+
+      // Active state button formatting
+      document.querySelectorAll('.tf-btn').forEach(btn => {
+        btn.className = "tf-btn px-2.5 py-1 rounded-lg text-gray-400 hover:text-white transition";
+      });
+      event.target.className = "tf-btn px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-400 font-semibold border border-brand-500/30";
+    }
+
+    // Navigation Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.className = "nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-dark-hover hover:text-gray-200 transition";
+      });
+
+      const activeNav = document.getElementById('nav-' + tabId);
+      if(activeNav) {
+        activeNav.className = "nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20";
+      }
+    }
+
+    // Swap Calculator Logic
+    const rates = { BTC: 68420.50, ETH: 3540.12, SOL: 142.80, USDT: 1, RONY: 1 };
+
+    function calculateSwap() {
+      const fromToken = document.getElementById('swapFromToken').value;
+      const toToken = document.getElementById('swapToToken').value;
+      const amount = parseFloat(document.getElementById('swapFromAmount').value) || 0;
+
+      const rate = rates[fromToken] / rates[toToken];
+      const result = (amount * rate).toFixed(2);
+
+      document.getElementById('swapToAmount').value = result;
+      document.getElementById('swapRateText').innerText = `1 ${fromToken} ≈ ${rate.toFixed(4)} ${toToken}`;
+    }
+
+    function reverseSwapTokens() {
+      const from = document.getElementById('swapFromToken');
+      const to = document.getElementById('swapToToken');
+      const temp = from.value;
+      from.value = to.value;
+      to.value = temp;
+      calculateSwap();
+    }
+
+    function executeSwap() {
+      alert("Swap Executed Successfully on Rony.Fun Network!");
+    }
+
+    // Wallet Modal Logic
+    function toggleWalletModal() {
+      document.getElementById('walletModal').classList.toggle('hidden');
+    }
+
+    function connectWallet(provider) {
+      document.getElementById('walletBtnText').innerText = provider + " (0x71C...3F9)";
+      toggleWalletModal();
+      alert(`Connected to ${provider} via Rony.Fun!`);
+    }
+
+    // Copy Referral Link
+    function copyAffLink() {
+      const copyText = document.getElementById("affLink");
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value);
+      alert("Polymarket Affiliate Link Copied!");
+    }
+  </script>
+</body>
+            </html>
